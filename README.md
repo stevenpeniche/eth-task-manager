@@ -15,8 +15,8 @@ Users will be able to...
 
 1. Fork this repository on GitHub.
 2. Open a terminal window.
-3. Clone this repository it to your computer with `git clone <insert repository URL>`.
-4. Change into the cloned code base with `cd eth-task-manager`.
+3. Clone this repository to your computer with `git clone <insert repository URL>`.
+4. Change into the cloned code base directory with `cd eth-task-manager`.
 5. Download [Ganache](https://trufflesuite.com/ganache/) to run a local Ethereum blockchain.
 6. Install [Node](https://nodejs.org/en/) if you haven't already.
    1. Verify installation.
@@ -26,7 +26,7 @@ Users will be able to...
    1. Verify installation with `truffle --version` - _should be `v5` or higher._
 8. Install project dependencies with `npm install`.
 9. Initialize a truffle project with `truffle init`.
-10. There should be a file named `truffle-config.js`. Replace it's contents with this block of code:
+10. There should be a file named `truffle-config.js`. Replace it's contents with this code block:
     ```js
     module.exports = {
       networks: {
