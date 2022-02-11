@@ -1,6 +1,6 @@
 {
   "server": {
-    "baseDir": ["./website", "./build/contracts"],
+    "baseDir": ["./website", "./artifacts/contracts"],
     "routes": {
       "/dependencies": "./node_modules"
     }
