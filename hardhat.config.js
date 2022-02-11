@@ -23,4 +23,9 @@ task('deploy', 'Deploys contracts', async (taskArgs, hre) => {
 
 module.exports = {
   solidity: '0.8.0',
+  networks: {
+    hardhat: {
+      chainId: 1337,
+    },
+  },
 };

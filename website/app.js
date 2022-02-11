@@ -1,5 +1,8 @@
+const TASK_MANAGER_CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Grab from running node
+
 App = {
   account: undefined,
+  web3: undefined,
   taskManager: undefined,
   load: async () => {
     const web3Loaded = await App.loadWeb3();
@@ -11,14 +14,12 @@ App = {
   },
   configureUI: () => {
     document.querySelector('#add-task').addEventListener('click', App.addTask);
-    document.querySelector('#content').style.display = 'block';
-    document.querySelector('#loading').style.display = 'none';
   },
   loadWeb3: async () => {
     try {
       if (window.ethereum) {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        window.web3 = new Web3(window.ethereum);
+        App.web3 = new ethers.providers.Web3Provider(window.ethereum); // Web 3 via Metamask
+        await App.web3.send('eth_requestAccounts', []);
         return true;
       }
       return false;
@@ -29,11 +30,10 @@ App = {
   },
   loadAccount: async () => {
     try {
-      App.account = (await window.web3.eth.getAccounts())[0];
-      await App.render();
-      // Keep selected account in sync
-      window.ethereum.on('accountsChanged', async (accounts) => {
-        App.account = accounts[0];
+      App.account = await App.web3.getSigner();
+      // Keep selected account synced
+      App.web3.provider.on('accountsChanged', async (accounts) => {
+        App.account = await App.web3.getSigner();
         await App.render(true);
       });
     } catch (error) {
@@ -42,14 +42,22 @@ App = {
   },
   loadTaskManager: async () => {
     try {
+      if ((await App.web3.getCode(TASK_MANAGER_CONTRACT_ADDRESS)) === '0x') {
+        // Default "Not deployed value"
+        alert("Task Manager Contract hasn't been deployed to this network!");
+        return;
+      }
       // Load TaskManager contract schema
-      const response = await fetch('.//TaskManager.json');
-      // Configure TaskManager contract
-      const taskManagerContract = TruffleContract(await response.json());
-      taskManagerContract.setProvider(window.ethereum);
-      // Grab latest TaskManager instance
-      App.taskManager = await taskManagerContract.deployed();
-      await App.render();
+      const response = await fetch('./TaskManager.sol/TaskManager.json');
+      // Grab TaskManager contract ABI
+      const taskManagerContractABI = (await response.json()).abi;
+      // Create TaskManager instance
+      App.taskManager = await new ethers.Contract(
+        TASK_MANAGER_CONTRACT_ADDRESS,
+        taskManagerContractABI,
+        App.account
+      );
+      await App.render(true);
     } catch (error) {
       alert(error.message);
     }
@@ -59,20 +67,24 @@ App = {
       const contentEl = document.querySelector('#content');
       const loadingEl = document.querySelector('#loading');
       const accountEl = document.querySelector('#account');
+      if (!App.account || !App.taskManager) {
+        const message = 'Not connected to Web3';
+        alert(message);
+        loadingEl.innerHTML = message;
+        return;
+      }
       if (setLoading) {
         contentEl.style.display = 'none';
         loadingEl.style.display = 'flex';
       }
-      if (App.taskManager) {
-        accountEl.textContent = App.account;
-        await App.listTasks();
-        if (setLoading) {
-          // Delay UI update
-          setTimeout(() => {
-            loadingEl.style.display = 'none';
-            contentEl.style.display = 'block';
-          }, 500);
-        }
+      accountEl.textContent = await App.account.getAddress();
+      await App.listTasks();
+      if (setLoading) {
+        // Delay UI update
+        setTimeout(() => {
+          loadingEl.style.display = 'none';
+          contentEl.style.display = 'block';
+        }, 500);
       }
     } catch (error) {
       alert(error.message);
@@ -80,7 +92,7 @@ App = {
   },
   listTasks: async () => {
     try {
-      const taskList = await App.taskManager.listTasks({ from: App.account });
+      const taskList = await App.taskManager.listTasks();
       let taskListEl = document.querySelector('#task-list');
       taskListEl.innerHTML = ''; // Clear task list
       taskList.forEach((task) => {
@@ -110,8 +122,9 @@ App = {
       let contentInput = document.querySelector('#task-content');
       const content = contentInput.value.trim();
       if (content) {
-        await App.taskManager.addTask(content, { from: App.account });
+        const tx = await App.taskManager.addTask(content);
         contentInput.value = ''; // Clear input
+        await tx.wait();
         await App.render();
       } else {
         alert("Task can't be empty");
@@ -123,7 +136,8 @@ App = {
   removeTask: async (event) => {
     try {
       const taskID = event.target.parentElement.id;
-      await App.taskManager.removeTask(taskID, { from: App.account });
+      const tx = await App.taskManager.removeTask(taskID);
+      await tx.wait();
       await App.render();
     } catch (error) {
       alert(error.message);
@@ -133,7 +147,8 @@ App = {
     try {
       event.preventDefault();
       const taskID = event.target.parentElement.id;
-      await App.taskManager.toggleTask(taskID, { from: App.account });
+      const tx = await App.taskManager.toggleTask(taskID);
+      await tx.wait();
       await App.render();
     } catch (error) {
       alert(error.message);
