@@ -1,6 +1,6 @@
 # Ethereum Task Manager Tutorial
 
-Build a task manager Ethereum dApp using VanillaJS, [Bootstrap 5](https://getbootstrap.com/), [Truffle](https://github.com/trufflesuite/truffle) and [Web3.js](https://github.com/ChainSafe/web3.js).
+Build a task manager Ethereum dApp using VanillaJS, [Bootstrap 5](https://getbootstrap.com/), [Hardhat](https://github.com/NomicFoundation/hardhat) and [Ethers.js](https://github.com/ethers-io/ethers.js).
 
 ## Features
 
