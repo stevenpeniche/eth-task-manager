@@ -17,6 +17,7 @@ Users will be able to...
 2. Open a terminal window.
 3. Clone this repository to your computer with `git clone <insert repository URL>`.
 4. Change into the cloned code base directory with `cd eth-task-manager`.
+5. Create a branch dedicated to the implementation type you're working on, i.e. VanillaJS, TypeScript/React, etc.
 6. Install [Node](https://nodejs.org/en/) if you haven't already.
    1. Verify installation.
       1. Run `node --version` - _should be `v14` or higher._
@@ -24,7 +25,7 @@ Users will be able to...
 7. Install project dependencies with `npm install`.
 8. Initialize a hardhat project with `npx hardhat init`.
    1. Select the **Create an empty hardhat.config.js** option.
-10. There should be a file named `hardhat.config.js`. Replace it's contents with this code block:
+9. There should be a file named `hardhat.config.js`. Replace it's contents with this code block:
     ```js
       module.exports = {
         solidity: '0.8.0',
