@@ -1,13 +1,18 @@
-const { expect } = require('chai');
-const { ethers, accounts } = require('hardhat');
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { Signer } from 'ethers';
+
+import type { TaskManager } from '../typechain-types';
 
 describe('TaskManager', () => {
-  let taskManager;
+  let accounts: Signer[];
+  let taskManager: TaskManager;
 
   before(async () => {
+    accounts = await ethers.getSigners();
     // Use the same task manager instance for each test
-    const TaskManager = await hre.ethers.getContractFactory('TaskManager');
-    taskManager = await TaskManager.deploy();
+    const TaskManagerFactory = await ethers.getContractFactory('TaskManager');
+    taskManager = await TaskManagerFactory.deploy();
     await taskManager.deployed();
   });
 
@@ -24,7 +29,7 @@ describe('TaskManager', () => {
     await taskManager.addTask(taskContent);
     const addedTask = await taskManager.getTask(taskID);
 
-    expect(addedTask.owner).to.equal(taskOwner.address);
+    expect(addedTask.owner).to.equal(await taskOwner.getAddress());
     expect(addedTask.content).to.equal(taskContent);
     expect(addedTask.complete).to.be.false;
     expect(await taskManager.nextTaskID()).to.equal(1);

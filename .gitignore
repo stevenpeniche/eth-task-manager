@@ -1,6 +1,7 @@
 # Hardhat
 artifacts
 cache
+typechain-types
 
 # Logs
 logs

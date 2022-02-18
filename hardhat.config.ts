@@ -1,19 +1,16 @@
-require('@nomiclabs/hardhat-waffle');
+import '@typechain/hardhat';
+import '@nomiclabs/hardhat-ethers';
+import '@nomiclabs/hardhat-waffle';
+import { task } from 'hardhat/config';
 
-// Extend HR with accounts property
-extendEnvironment(async (hre) => {
-  hre.accounts = await hre.ethers.getSigners();
-});
-
-task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
+task('accounts', 'Prints the list of accounts', async (_, hre) => {
   const accounts = await hre.ethers.getSigners();
-
   for (const account of accounts) {
     console.log(account.address);
   }
 });
 
-task('deploy', 'Deploys contracts', async (taskArgs, hre) => {
+task('deploy', 'Deploys contracts', async (_, hre) => {
   const TaskManager = await hre.ethers.getContractFactory('TaskManager');
   const taskManager = await TaskManager.deploy();
   await taskManager.deployed();
@@ -21,7 +18,7 @@ task('deploy', 'Deploys contracts', async (taskArgs, hre) => {
   console.log('TaskManager deployed to:', taskManager.address);
 });
 
-module.exports = {
+export default {
   solidity: '0.8.0',
   networks: {
     hardhat: {
